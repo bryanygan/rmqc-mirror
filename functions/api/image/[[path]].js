@@ -5,19 +5,19 @@
  */
 
 export async function onRequest(context) {
-  const { request } = context;
-  const url = new URL(request.url);
+  const { params } = context;
 
-  // Parse path: /api/image/{vendor}/{imageId}/{size}
-  const pathParts = url.pathname.split('/').filter(p => p);
+  // Get the catch-all path parameter
+  // For /api/image/rmqc/xxx/medium.jpg, params.path = ["rmqc", "xxx", "medium.jpg"]
+  const pathParts = params.path || [];
 
-  if (pathParts.length !== 5 || pathParts[0] !== 'api' || pathParts[1] !== 'image') {
-    return new Response('Invalid path format', { status: 400 });
+  if (pathParts.length !== 3) {
+    return new Response('Invalid path format. Expected: /api/image/{vendor}/{imageId}/{size}', { status: 400 });
   }
 
-  const vendor = pathParts[2];
-  const imageId = pathParts[3];
-  const sizeFile = pathParts[4]; // e.g., "medium.jpg" or "medium.jpeg"
+  const vendor = pathParts[0];
+  const imageId = pathParts[1];
+  const sizeFile = pathParts[2]; // e.g., "medium.jpg" or "medium.jpeg"
 
   // Construct the upstream URL (internal - not exposed to client)
   const imageUrl = `https://photo.yupoo.com/${vendor}/${imageId}/${sizeFile}`;
