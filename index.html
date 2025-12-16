@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="origin">
   <title>Mirror Photo Galleries</title>
   <style>
     body {
@@ -20,6 +21,7 @@
       flex-wrap: wrap;
       justify-content: center;
       gap: 20px;
+      margin-bottom: 40px;
     }
     .album-card {
       background: #fff;
@@ -47,34 +49,178 @@
       color: inherit;
       text-decoration: none;
     }
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin: 40px 0;
+      flex-wrap: wrap;
+    }
+    .pagination a,
+    .pagination span {
+      padding: 8px 12px;
+      background: #fff;
+      border-radius: 4px;
+      text-decoration: none;
+      color: #333;
+      border: 1px solid #ddd;
+      transition: all 0.2s;
+    }
+    .pagination a:hover {
+      background: #49bc85;
+      color: #fff;
+      border-color: #49bc85;
+    }
+    .pagination .current {
+      background: #49bc85;
+      color: #fff;
+      border-color: #49bc85;
+      font-weight: bold;
+    }
+    .pagination .disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .page-info {
+      text-align: center;
+      color: #666;
+      margin: 20px 0;
+    }
   </style>
 </head>
 <body>
   <h1>Photo Galleries</h1>
+  <div class="page-info" id="page-info"></div>
   <div class="album-container" id="album-container">
     <!-- Albums will be injected here -->
   </div>
+  <div class="pagination" id="pagination">
+    <!-- Pagination will be injected here -->
+  </div>
   <script>
+    const ALBUMS_PER_PAGE = 120; // Match Yupoo's pagination
+
+    // Get current page from URL
+    const params = new URLSearchParams(window.location.search);
+    const currentPage = parseInt(params.get('page')) || 1;
+
     fetch('albums.json')
       .then(response => response.json())
       .then(data => {
+        const allAlbums = data.albums.filter(album => album.cover && album.title);
+        const totalAlbums = allAlbums.length;
+        const totalPages = Math.ceil(totalAlbums / ALBUMS_PER_PAGE);
+
+        // Calculate start and end indices for current page
+        const startIndex = (currentPage - 1) * ALBUMS_PER_PAGE;
+        const endIndex = Math.min(startIndex + ALBUMS_PER_PAGE, totalAlbums);
+        const albumsOnPage = allAlbums.slice(startIndex, endIndex);
+
+        // Display albums for current page
         const container = document.getElementById('album-container');
-        data.albums.forEach(album => {
-          // Skip albums without a cover or title
-          if (!album.cover || !album.title) return;
+        albumsOnPage.forEach(album => {
           const card = document.createElement('div');
           card.className = 'album-card';
           card.innerHTML = `
             <a href="gallery.html?id=${encodeURIComponent(album.id)}">
-              <img src="${album.cover}" alt="${album.title}">
+              <img src="${album.cover}" alt="${album.title}" referrerpolicy="origin" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22150%22%3E%3Crect fill=%22%23ddd%22 width=%22200%22 height=%22150%22/%3E%3Ctext fill=%22%23999%22 font-family=%22Arial%22 font-size=%2214%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3ENo Image%3C/text%3E%3C/svg%3E'">
               <h2>${album.title}</h2>
             </a>
           `;
           container.appendChild(card);
         });
+
+        // Display page info
+        const pageInfo = document.getElementById('page-info');
+        pageInfo.textContent = `Showing ${startIndex + 1}-${endIndex} of ${totalAlbums} albums (Page ${currentPage} of ${totalPages})`;
+
+        // Create pagination controls
+        const pagination = document.getElementById('pagination');
+
+        // Previous button
+        if (currentPage > 1) {
+          const prevLink = document.createElement('a');
+          prevLink.href = currentPage === 2 ? 'index.html' : `index.html?page=${currentPage - 1}`;
+          prevLink.textContent = '← Previous';
+          pagination.appendChild(prevLink);
+        } else {
+          const prevSpan = document.createElement('span');
+          prevSpan.className = 'disabled';
+          prevSpan.textContent = '← Previous';
+          pagination.appendChild(prevSpan);
+        }
+
+        // Page numbers
+        const maxVisiblePages = 10;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        // Adjust if we're near the end
+        if (endPage - startPage < maxVisiblePages - 1) {
+          startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        // First page link
+        if (startPage > 1) {
+          const firstLink = document.createElement('a');
+          firstLink.href = 'index.html';
+          firstLink.textContent = '1';
+          pagination.appendChild(firstLink);
+
+          if (startPage > 2) {
+            const ellipsis = document.createElement('span');
+            ellipsis.textContent = '...';
+            pagination.appendChild(ellipsis);
+          }
+        }
+
+        // Page number links
+        for (let i = startPage; i <= endPage; i++) {
+          if (i === currentPage) {
+            const currentSpan = document.createElement('span');
+            currentSpan.className = 'current';
+            currentSpan.textContent = i;
+            pagination.appendChild(currentSpan);
+          } else {
+            const pageLink = document.createElement('a');
+            pageLink.href = i === 1 ? 'index.html' : `index.html?page=${i}`;
+            pageLink.textContent = i;
+            pagination.appendChild(pageLink);
+          }
+        }
+
+        // Last page link
+        if (endPage < totalPages) {
+          if (endPage < totalPages - 1) {
+            const ellipsis = document.createElement('span');
+            ellipsis.textContent = '...';
+            pagination.appendChild(ellipsis);
+          }
+
+          const lastLink = document.createElement('a');
+          lastLink.href = `index.html?page=${totalPages}`;
+          lastLink.textContent = totalPages;
+          pagination.appendChild(lastLink);
+        }
+
+        // Next button
+        if (currentPage < totalPages) {
+          const nextLink = document.createElement('a');
+          nextLink.href = `index.html?page=${currentPage + 1}`;
+          nextLink.textContent = 'Next →';
+          pagination.appendChild(nextLink);
+        } else {
+          const nextSpan = document.createElement('span');
+          nextSpan.className = 'disabled';
+          nextSpan.textContent = 'Next →';
+          pagination.appendChild(nextSpan);
+        }
       })
       .catch(error => {
         console.error('Error loading album list:', error);
+        document.getElementById('page-info').textContent = 'Error loading albums';
       });
   </script>
 </body>

@@ -4,28 +4,36 @@ This is a static mirror website for https://rmqc.x.yupoo.com/albums
 
 ## Status
 
-✅ **Currently Working:**
-- Album listing page showing all 120 albums with cover images
-- 1 album (8202663 / ID: 220231397) fully functional with all 11 images
-- Clean, responsive design matching the original site's layout
+✅ **Fully Working:**
+- **8,639 albums** mirrored from all 72 pages of the original website
+- **72-page pagination** system matching the original site (120 albums per page)
+- All albums display with cover images
+- 1 album (8202663 / ID: 220231397) has full gallery with all 11 images
+- Clean, responsive design with page navigation
 
 ⚠️ **Partially Working:**
-- 119 albums show in the listing but don't have gallery images yet
-- To get full image data for these albums, you need to download their individual album pages
+- 8,638 albums show in listings but need individual album pages downloaded for full galleries
+- To get full image data, download individual album pages and run the extraction script
 
 ## Project Structure
 
 ```
 mirror-site/
-├── index.html              # Main album listing page
+├── index.html              # Main album listing page with pagination
 ├── gallery.html            # Individual album gallery viewer
-├── albums.json             # Album data (120 albums)
-├── extract_albums.py       # Python script to extract album data from downloaded HTML
+├── albums.json             # Album data (8,639 albums from 72 pages)
+├── download_pages.py       # Script to download all pages from Yupoo
+├── extract_all_albums.py   # Script to extract all album data from downloaded pages
+├── extract_albums.py       # Legacy script (kept for compatibility)
+├── pages/                  # Downloaded listing pages (72 pages)
+│   ├── page_1.html
+│   ├── page_2.html
+│   └── ... (72 pages total)
 ├── rmqc/                   # Downloaded Yupoo pages
-│   ├── rmqc _ Yupoo.html   # Main albums listing (120 albums)
+│   ├── rmqc _ Yupoo.html   # Original listing page (page 1)
 │   ├── rmqc _ Yupoo_files/ # Downloaded images and assets
 │   └── 8202663/            # Individual album folder
-│       └── a853a7acd48486a27d4a0a1f2a93b5b8.jpg _ Yupoo.html
+│       └── [album HTML]
 └── README.md               # This file
 ```
 
@@ -44,7 +52,9 @@ php -S localhost:8000
 ```
 
 Then open your browser to:
-- Main page: http://localhost:8000/index.html
+- Main page (Page 1): http://localhost:8000/index.html
+- Page 2: http://localhost:8000/index.html?page=2
+- Page 72: http://localhost:8000/index.html?page=72
 - Gallery example: http://localhost:8000/gallery.html?id=220231397
 
 ### 2. Add More Albums
@@ -61,13 +71,13 @@ To mirror additional albums:
 
 3. **Extract the data:**
    ```bash
-   python3 extract_albums.py
+   python3 extract_all_albums.py
    ```
 
    This will:
    - Parse all downloaded album pages
    - Update `albums.json` with new image data
-   - Preserve existing data
+   - Preserve existing data from all 72 pages
 
 ### 3. Update the Main Albums Listing
 
@@ -118,18 +128,20 @@ The `albums.json` file contains:
 
 ## Next Steps
 
-To create a complete mirror:
+To get full image galleries for all albums:
 
-1. Download more individual album pages (for the 119 albums without images)
-2. Run `extract_albums.py` after each batch of downloads
-3. Consider downloading multiple pages of the albums listing if there are more than 120 albums
+1. Download individual album pages (for the 8,638 albums that only have covers)
+2. Run `extract_all_albums.py` after each batch of downloads
+3. All 72 pages of listings are already mirrored!
 
 ## Notes
 
 - All image URLs from detailed albums point to Yupoo's CDN (photo.yupoo.com)
-- Cover images for albums from the listing are stored locally in `rmqc/rmqc _ Yupoo_files/`
+- Cover images point to Yupoo's CDN for all 8,639 albums
 - The extraction script preserves existing data, so you can run it multiple times safely
 - Album with ID 220231397 is fully functional as an example
+- **72 pages** match the original Yupoo website exactly
+- **120 albums per page** (except page 72 which has 119)
 
 ## Troubleshooting
 
@@ -141,3 +153,6 @@ To create a complete mirror:
 
 **Issue**: Script doesn't find albums
 - **Solution**: Make sure HTML files are in the correct folder structure and named correctly
+
+**Issue**: Need to re-download all pages
+- **Solution**: Run `python3 download_pages.py` - it will skip already downloaded pages
