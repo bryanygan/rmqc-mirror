@@ -31,16 +31,26 @@ class AlbumParser(HTMLParser):
         # Extract images from img tags with photo.yupoo.com URLs
         if tag == 'img' and 'data-src' in attrs_dict:
             data_src = attrs_dict.get('data-src', '')
+            data_origin_src = attrs_dict.get('data-origin-src', '')
+
             if 'photo.yupoo.com' in data_src:
-                # Extract the image ID from the URL
-                # Format: //photo.yupoo.com/rmqc/[id]/big.jpg
-                match = re.search(r'photo\.yupoo\.com/rmqc/([a-f0-9]+)/big\.jpg', data_src)
+                # Extract the image ID and small/big URLs
+                # data-src format: //photo.yupoo.com/rmqc/[id]/big.jpeg
+                # data-origin-src format: //photo.yupoo.com/rmqc/[id]/[filename].jpeg (actual full-size URL)
+                match = re.search(r'photo\.yupoo\.com/rmqc/([a-f0-9]+)/', data_src)
                 if match:
                     img_id = match.group(1)
-                    # Add https: prefix
+
+                    # Determine file extension
+                    ext = '.jpeg' if '.jpeg' in data_src else '.jpg'
+
+                    # Use medium.jpg/jpeg for both thumbnail and full-size view
+                    # medium.jpg works with hotlinking (confirmed by working cover images)
+                    medium_url = f'https://photo.yupoo.com/rmqc/{img_id}/medium{ext}'
+
                     self.images.append({
-                        'small': f'https://photo.yupoo.com/rmqc/{img_id}/small.jpg',
-                        'big': f'https://photo.yupoo.com/rmqc/{img_id}/big.jpg'
+                        'small': medium_url,
+                        'big': medium_url
                     })
 
 

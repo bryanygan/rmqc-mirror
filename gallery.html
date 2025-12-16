@@ -74,16 +74,41 @@
             return;
           }
           titleEl.textContent = album.title;
+
+          // Check if album has images
+          if (!album.images || album.images.length === 0) {
+            // Show message that images need to be downloaded
+            const noImagesMsg = document.createElement('div');
+            noImagesMsg.style.cssText = 'text-align: center; padding: 40px 20px; background: #fff; border-radius: 8px; margin: 20px auto; max-width: 600px;';
+            noImagesMsg.innerHTML = `
+              <h2 style="color: #333; margin-bottom: 20px;">📦 Gallery Not Available</h2>
+              <p style="color: #666; margin-bottom: 20px;">This album's image data hasn't been extracted yet.</p>
+              <div style="background: #f5f5f5; padding: 20px; border-radius: 4px; margin: 20px 0;">
+                <p style="margin: 0; color: #333;"><strong>Album:</strong> ${album.title}</p>
+                <p style="margin: 10px 0 0 0; color: #666; font-size: 0.9em;">ID: ${album.id}</p>
+              </div>
+              ${album.cover ? `
+              <div style="margin-top: 30px;">
+                <p style="color: #666; margin-bottom: 10px;">Cover Image:</p>
+                <img src="${album.cover}" alt="${album.title}" referrerpolicy="origin" style="max-width: 100%; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+              </div>
+              ` : ''}
+              <p style="color: #999; margin-top: 30px; font-size: 0.9em;">To enable this gallery, download the album page and run the extraction script.</p>
+            `;
+            galleryEl.appendChild(noImagesMsg);
+            return;
+          }
+
+          // Display images
+          // Note: We can't use target="_blank" links because Yupoo blocks hotlinking
+          // when opening in a new tab (referrer policy doesn't transfer properly)
           album.images.forEach(img => {
-            const link = document.createElement('a');
-            link.href = img.big;
-            link.target = '_blank';
             const image = document.createElement('img');
             image.src = img.small;
             image.alt = album.title;
             image.referrerPolicy = 'origin';
-            link.appendChild(image);
-            galleryEl.appendChild(link);
+            image.style.cursor = 'default';
+            galleryEl.appendChild(image);
           });
         })
         .catch(err => {

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Referrer Policy Test</title>
+  <style>
+    body {
+      font-family: monospace;
+      padding: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .test {
+      margin: 20px 0;
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      display: inline-block;
+      margin-right: 20px;
+      vertical-align: top;
+    }
+    img {
+      display: block;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      max-width: 200px;
+      max-height: 200px;
+    }
+    .success { border-color: #4caf50; background: #e8f5e9; }
+    .failure { border-color: #f44336; background: #ffebee; }
+  </style>
+</head>
+<body>
+  <h1>Referrer Policy Test</h1>
+  <p>Testing which referrer policy allows Yupoo images to load...</p>
+
+  <div id="tests"></div>
+
+  <script>
+    const policies = [
+      'no-referrer',
+      'no-referrer-when-downgrade',
+      'origin',
+      'origin-when-cross-origin',
+      'same-origin',
+      'strict-origin',
+      'strict-origin-when-cross-origin',
+      'unsafe-url'
+    ];
+
+    const testUrl = 'https://photo.yupoo.com/rmqc/4c321195/small.jpg';
+    const container = document.getElementById('tests');
+
+    policies.forEach(policy => {
+      const div = document.createElement('div');
+      div.className = 'test';
+      div.innerHTML = `
+        <h3>${policy}</h3>
+        <img src="${testUrl}" referrerpolicy="${policy}" alt="Test">
+        <p class="status">Loading...</p>
+      `;
+
+      const img = div.querySelector('img');
+      const status = div.querySelector('.status');
+
+      img.onload = () => {
+        status.textContent = '✓ SUCCESS';
+        div.classList.add('success');
+      };
+
+      img.onerror = () => {
+        status.textContent = '✗ FAILED';
+        div.classList.add('failure');
+      };
+
+      container.appendChild(div);
+    });
+
+    // Also test with meta tag
+    const metaDiv = document.createElement('div');
+    metaDiv.className = 'test';
+    metaDiv.innerHTML = `
+      <h3>Meta: unsafe-url</h3>
+      <img src="${testUrl}" alt="Test">
+      <p class="status">Loading...</p>
+    `;
+    const metaImg = metaDiv.querySelector('img');
+    const metaStatus = metaDiv.querySelector('.status');
+
+    // Add meta tag
+    const meta = document.createElement('meta');
+    meta.name = 'referrer';
+    meta.content = 'unsafe-url';
+    document.head.appendChild(meta);
+
+    metaImg.onload = () => {
+      metaStatus.textContent = '✓ SUCCESS';
+      metaDiv.classList.add('success');
+    };
+
+    metaImg.onerror = () => {
+      metaStatus.textContent = '✗ FAILED';
+      metaDiv.classList.add('failure');
+    };
+
+    container.appendChild(metaDiv);
+  </script>
+</body>
+</html>

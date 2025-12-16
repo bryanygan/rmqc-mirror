@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Album Data Test</title>
+  <style>
+    body {
+      font-family: monospace;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .stats {
+      background: #f0f0f0;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .album {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    .has-images {
+      background: #e8f5e9;
+      border-color: #4caf50;
+    }
+    .no-images {
+      background: #ffebee;
+      border-color: #f44336;
+    }
+  </style>
+</head>
+<body>
+  <h1>Album Data Diagnostic</h1>
+  <div class="stats" id="stats">Loading...</div>
+  <h2>First 20 Albums:</h2>
+  <div id="albums">Loading...</div>
+
+  <script>
+    fetch('albums.json?t=' + Date.now()) // Add timestamp to bypass cache
+      .then(res => res.json())
+      .then(data => {
+        const total = data.albums.length;
+        const withImages = data.albums.filter(a => a.images && a.images.length > 0).length;
+        const withoutImages = total - withImages;
+
+        // Display stats
+        document.getElementById('stats').innerHTML = `
+          <h3>Statistics</h3>
+          <p><strong>Total albums:</strong> ${total}</p>
+          <p><strong>Albums with images:</strong> ${withImages} (${Math.round(withImages/total*100)}%)</p>
+          <p><strong>Albums without images:</strong> ${withoutImages} (${Math.round(withoutImages/total*100)}%)</p>
+          <p><strong>Cache-busting timestamp:</strong> ${Date.now()}</p>
+        `;
+
+        // Display first 20 albums
+        const albumsHtml = data.albums.slice(0, 20).map((album, i) => {
+          const hasImages = album.images && album.images.length > 0;
+          const imageCount = album.images ? album.images.length : 0;
+          const className = hasImages ? 'has-images' : 'no-images';
+          const status = hasImages ? `✓ ${imageCount} images` : '✗ No images';
+
+          return `
+            <div class="album ${className}">
+              <strong>${i + 1}. ${album.title}</strong> (ID: ${album.id})<br>
+              Status: ${status}<br>
+              <a href="gallery.html?id=${album.id}" target="_blank">View Gallery</a>
+            </div>
+          `;
+        }).join('');
+
+        document.getElementById('albums').innerHTML = albumsHtml;
+      })
+      .catch(err => {
+        document.getElementById('stats').innerHTML = `<p style="color: red;">Error: ${err}</p>`;
+      });
+  </script>
+</body>
+</html>

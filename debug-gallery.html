@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="origin">
+  <title>Debug Gallery</title>
+  <style>
+    body {
+      font-family: monospace;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .test-image {
+      margin: 20px 0;
+      padding: 20px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+    }
+    img {
+      display: block;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>Image Hotlinking Test</h1>
+
+  <div class="test-image">
+    <h3>Test 1: Small image with referrerPolicy</h3>
+    <img src="https://photo.yupoo.com/rmqc/4c321195/small.jpg"
+         referrerpolicy="origin"
+         alt="Test small image"
+         onload="this.nextElementSibling.textContent = '✓ Loaded successfully'"
+         onerror="this.nextElementSibling.textContent = '✗ Failed to load'">
+    <p>Status: <span>Loading...</span></p>
+  </div>
+
+  <div class="test-image">
+    <h3>Test 2: Medium image with referrerPolicy</h3>
+    <img src="https://photo.yupoo.com/rmqc/4c321195/medium.jpg"
+         referrerpolicy="origin"
+         alt="Test medium image"
+         onload="this.nextElementSibling.textContent = '✓ Loaded successfully'"
+         onerror="this.nextElementSibling.textContent = '✗ Failed to load'">
+    <p>Status: <span>Loading...</span></p>
+  </div>
+
+  <div class="test-image">
+    <h3>Test 3: Actual filename with referrerPolicy</h3>
+    <img src="https://photo.yupoo.com/rmqc/4c321195/00a68343.jpg"
+         referrerpolicy="origin"
+         alt="Test actual filename"
+         onload="this.nextElementSibling.textContent = '✓ Loaded successfully'"
+         onerror="this.nextElementSibling.textContent = '✗ Failed to load'">
+    <p>Status: <span>Loading...</span></p>
+  </div>
+
+  <div class="test-image">
+    <h3>Test 4: Album data check</h3>
+    <p>Loading albums.json...</p>
+    <pre id="album-data"></pre>
+  </div>
+
+  <script>
+    fetch('albums.json?t=' + Date.now())
+      .then(res => res.json())
+      .then(data => {
+        const album = data.albums[0];
+        const output = document.getElementById('album-data');
+        output.textContent = JSON.stringify({
+          title: album.title,
+          id: album.id,
+          imageCount: album.images ? album.images.length : 0,
+          firstImage: album.images ? album.images[0] : null
+        }, null, 2);
+      })
+      .catch(err => {
+        document.getElementById('album-data').textContent = 'Error: ' + err.message;
+      });
+  </script>
+</body>
+</html>
