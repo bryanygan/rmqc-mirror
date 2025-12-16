@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gallery</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f8f8f8;
+    }
+    #back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      text-decoration: none;
+      color: #0077cc;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .gallery {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+    .gallery a {
+      flex: 1 0 200px;
+      display: block;
+    }
+    .gallery img {
+      width: 100%;
+      height: auto;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .not-found {
+      text-align: center;
+      color: #c00;
+    }
+  </style>
+</head>
+<body>
+  <a id="back-link" href="index.html">&larr; Back to galleries</a>
+  <h1 id="gallery-title">Gallery</h1>
+  <div id="gallery" class="gallery"></div>
+  <p id="message" class="not-found" style="display:none;">Album not found.</p>
+  <script>
+    (function() {
+      // Parse album ID from query string
+      const params = new URLSearchParams(window.location.search);
+      const albumId = params.get('id');
+      const galleryEl = document.getElementById('gallery');
+      const titleEl = document.getElementById('gallery-title');
+      const msgEl = document.getElementById('message');
+
+      if (!albumId) {
+        titleEl.textContent = 'Album not specified';
+        msgEl.style.display = 'block';
+        return;
+      }
+      // Fetch albums data
+      fetch('albums.json')
+        .then(res => res.json())
+        .then(data => {
+          const album = data.albums.find(a => a.id === albumId);
+          if (!album) {
+            titleEl.textContent = 'Album not found';
+            msgEl.style.display = 'block';
+            return;
+          }
+          titleEl.textContent = album.title;
+          album.images.forEach(img => {
+            const link = document.createElement('a');
+            link.href = img.big;
+            link.target = '_blank';
+            const image = document.createElement('img');
+            image.src = img.small;
+            image.alt = album.title;
+            link.appendChild(image);
+            galleryEl.appendChild(link);
+          });
+        })
+        .catch(err => {
+          console.error('Failed to load album data:', err);
+          titleEl.textContent = 'Error loading album';
+          msgEl.style.display = 'block';
+        });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mirror Photo Galleries</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f8f8f8;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .album-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+    }
+    .album-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      overflow: hidden;
+      text-align: center;
+      width: 200px;
+      transition: transform 0.2s;
+    }
+    .album-card:hover {
+      transform: scale(1.05);
+    }
+    .album-card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+    }
+    .album-card h2 {
+      font-size: 1rem;
+      margin: 10px 0;
+      color: #333;
+    }
+    .album-card a {
+      color: inherit;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Photo Galleries</h1>
+  <div class="album-container" id="album-container">
+    <!-- Albums will be injected here -->
+  </div>
+  <script>
+    fetch('albums.json')
+      .then(response => response.json())
+      .then(data => {
+        const container = document.getElementById('album-container');
+        data.albums.forEach(album => {
+          // Skip albums without a cover or title
+          if (!album.cover || !album.title) return;
+          const card = document.createElement('div');
+          card.className = 'album-card';
+          card.innerHTML = `
+            <a href="gallery.html?id=${encodeURIComponent(album.id)}">
+              <img src="${album.cover}" alt="${album.title}">
+              <h2>${album.title}</h2>
+            </a>
+          `;
+          container.appendChild(card);
+        });
+      })
+      .catch(error => {
+        console.error('Error loading album list:', error);
+      });
+  </script>
+</body>
+</html>
