@@ -2,6 +2,9 @@
 rmqc/
 pages/
 
+# Large data file (use split files instead)
+albums.json
+
 # Python scripts (not needed for deployment)
 *.py
 __pycache__/

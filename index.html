@@ -106,17 +106,15 @@
     const params = new URLSearchParams(window.location.search);
     const currentPage = parseInt(params.get('page')) || 1;
 
-    fetch('albums.json')
+    // Load page-specific data file
+    fetch(`albums-data/page-${currentPage}.json`)
       .then(response => response.json())
       .then(data => {
-        const allAlbums = data.albums.filter(album => album.cover && album.title);
-        const totalAlbums = allAlbums.length;
-        const totalPages = Math.ceil(totalAlbums / ALBUMS_PER_PAGE);
-
-        // Calculate start and end indices for current page
-        const startIndex = (currentPage - 1) * ALBUMS_PER_PAGE;
-        const endIndex = Math.min(startIndex + ALBUMS_PER_PAGE, totalAlbums);
-        const albumsOnPage = allAlbums.slice(startIndex, endIndex);
+        const totalPages = data.total_pages;
+        const totalAlbums = data.total_albums;
+        const albumsOnPage = data.albums.filter(album => album.cover && album.title);
+        const startIndex = (currentPage - 1) * ALBUMS_PER_PAGE + 1;
+        const endIndex = startIndex + albumsOnPage.length - 1;
 
         // Display albums for current page
         const container = document.getElementById('album-container');

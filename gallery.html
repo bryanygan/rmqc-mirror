@@ -61,11 +61,26 @@
         msgEl.style.display = 'block';
         return;
       }
-      // Fetch albums data
-      fetch('albums.json')
+      // First, fetch the index to find which page the album is on
+      fetch('albums-index.json')
         .then(res => res.json())
-        .then(data => {
-          const album = data.albums.find(a => a.id === albumId);
+        .then(indexData => {
+          const albumIndex = indexData.albums.find(a => a.id === albumId);
+          if (!albumIndex) {
+            titleEl.textContent = 'Album not found';
+            msgEl.style.display = 'block';
+            return Promise.reject('Album not found');
+          }
+
+          // Now fetch the specific page data that contains this album
+          return fetch(`albums-data/page-${albumIndex.page}.json`)
+            .then(res => res.json())
+            .then(pageData => {
+              const album = pageData.albums.find(a => a.id === albumId);
+              return album;
+            });
+        })
+        .then(album => {
           if (!album) {
             titleEl.textContent = 'Album not found';
             msgEl.style.display = 'block';
