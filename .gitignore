@@ -1,1 +1,16 @@
-rmqc
+# Downloaded HTML files (not needed for deployment)
+rmqc/
+pages/
+
+# Python scripts (not needed for deployment)
+*.py
+__pycache__/
+*.pyc
+
+# Temporary/debug files
+debug-gallery.html
+referrer-test.html
+test.html
+
+# System files
+.DS_Store
