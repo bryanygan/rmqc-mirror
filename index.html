@@ -172,6 +172,41 @@
           if (startPage > 2) {
             const ellipsis = document.createElement('span');
             ellipsis.textContent = '...';
+            ellipsis.style.cursor = 'pointer';
+            ellipsis.title = 'Click to jump to page';
+            ellipsis.addEventListener('click', () => {
+              const input = document.createElement('input');
+              input.type = 'number';
+              input.min = '1';
+              input.max = totalPages;
+              input.value = '';
+              input.placeholder = 'Page';
+              input.style.width = '60px';
+              input.style.padding = '6px 8px';
+              input.style.border = '1px solid #ddd';
+              input.style.borderRadius = '4px';
+              input.style.textAlign = 'center';
+
+              input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                  const pageNum = parseInt(input.value);
+                  if (pageNum >= 1 && pageNum <= totalPages) {
+                    window.location.href = pageNum === 1 ? 'index.html' : `index.html?page=${pageNum}`;
+                  } else {
+                    alert(`Please enter a page number between 1 and ${totalPages}`);
+                  }
+                }
+              });
+
+              input.addEventListener('blur', () => {
+                ellipsis.style.display = 'inline-block';
+                input.remove();
+              });
+
+              ellipsis.style.display = 'none';
+              ellipsis.parentNode.insertBefore(input, ellipsis);
+              input.focus();
+            });
             pagination.appendChild(ellipsis);
           }
         }
@@ -196,6 +231,41 @@
           if (endPage < totalPages - 1) {
             const ellipsis = document.createElement('span');
             ellipsis.textContent = '...';
+            ellipsis.style.cursor = 'pointer';
+            ellipsis.title = 'Click to jump to page';
+            ellipsis.addEventListener('click', () => {
+              const input = document.createElement('input');
+              input.type = 'number';
+              input.min = '1';
+              input.max = totalPages;
+              input.value = '';
+              input.placeholder = 'Page';
+              input.style.width = '60px';
+              input.style.padding = '6px 8px';
+              input.style.border = '1px solid #ddd';
+              input.style.borderRadius = '4px';
+              input.style.textAlign = 'center';
+
+              input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                  const pageNum = parseInt(input.value);
+                  if (pageNum >= 1 && pageNum <= totalPages) {
+                    window.location.href = pageNum === 1 ? 'index.html' : `index.html?page=${pageNum}`;
+                  } else {
+                    alert(`Please enter a page number between 1 and ${totalPages}`);
+                  }
+                }
+              });
+
+              input.addEventListener('blur', () => {
+                ellipsis.style.display = 'inline-block';
+                input.remove();
+              });
+
+              ellipsis.style.display = 'none';
+              ellipsis.parentNode.insertBefore(input, ellipsis);
+              input.focus();
+            });
             pagination.appendChild(ellipsis);
           }
 
