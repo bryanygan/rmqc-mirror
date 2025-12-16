@@ -1,20 +1,29 @@
 /**
- * Cloudflare Pages Function to proxy Yupoo images
- * This bypasses CORS/CORB restrictions by fetching images server-side
+ * Cloudflare Pages Function to proxy images
+ * Path format: /api/image/{vendor}/{imageId}/{size}
+ * Example: /api/image/rmqc/4c321195/medium.jpg
  */
 
 export async function onRequest(context) {
   const { request } = context;
   const url = new URL(request.url);
-  const imageUrl = url.searchParams.get('url');
 
-  // Validate the image URL is from Yupoo
-  if (!imageUrl || !imageUrl.startsWith('https://photo.yupoo.com/')) {
-    return new Response('Invalid image URL', { status: 400 });
+  // Parse path: /api/image/{vendor}/{imageId}/{size}
+  const pathParts = url.pathname.split('/').filter(p => p);
+
+  if (pathParts.length !== 5 || pathParts[0] !== 'api' || pathParts[1] !== 'image') {
+    return new Response('Invalid path format', { status: 400 });
   }
 
+  const vendor = pathParts[2];
+  const imageId = pathParts[3];
+  const sizeFile = pathParts[4]; // e.g., "medium.jpg" or "medium.jpeg"
+
+  // Construct the upstream URL (internal - not exposed to client)
+  const imageUrl = `https://photo.yupoo.com/${vendor}/${imageId}/${sizeFile}`;
+
   try {
-    // Fetch the image from Yupoo with proper headers
+    // Fetch the image with proper headers
     const imageResponse = await fetch(imageUrl, {
       headers: {
         'Referer': 'https://rmqc.x.yupoo.com/',
@@ -23,7 +32,7 @@ export async function onRequest(context) {
     });
 
     if (!imageResponse.ok) {
-      return new Response('Failed to fetch image', { status: imageResponse.status });
+      return new Response('Image not found', { status: imageResponse.status });
     }
 
     // Return the image with appropriate headers
@@ -35,6 +44,6 @@ export async function onRequest(context) {
       },
     });
   } catch (error) {
-    return new Response('Error fetching image: ' + error.message, { status: 500 });
+    return new Response('Error loading image', { status: 500 });
   }
 }
