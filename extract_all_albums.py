@@ -70,6 +70,11 @@ def extract_album_from_html(html_path):
     if album_id:
         parser.album_id = album_id
 
+    # Reverse images array to show in correct order (first to last)
+    # The HTML parser extracts images in reverse order from how they should display
+    if parser.images:
+        parser.images.reverse()
+
     # Determine cover image (use first image or find medium.jpg)
     cover_image = None
     if parser.images:
