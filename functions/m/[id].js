@@ -108,9 +108,7 @@ function generateMirrorHTML(mirror) {
   <div class="container">
     <h1>${escapeHtml(mirror.title)}</h1>
     <div class="info">
-      ${mirror.images.length} images •
-      Mirrored on ${new Date(mirror.created_at).toLocaleDateString()} •
-      ${mirror.views || 0} views
+      ${mirror.images.length} images
     </div>
     <div class="image-grid">
       ${mirror.images.map((img, i) => `
@@ -120,9 +118,7 @@ function generateMirrorHTML(mirror) {
         </div>
       `).join('')}
     </div>
-    <div class="footer">
-      <p><a href="/">Back to Collection</a></p>
-    </div>
+
   </div>
 </body>
 </html>`;
@@ -168,8 +164,7 @@ function generateErrorHTML(message) {
   <div class="error">
     <h2>Error</h2>
     <p>${escapeHtml(message)}</p>
-    <p><a href="/mirror.html">Create a mirror</a> • <a href="/">Back to home</a></p>
-  </div>
+             <p><a href="/">Back to home</a></p>  </div>
 </body>
 </html>`;
 }
