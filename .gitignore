@@ -1,6 +1,7 @@
 # Downloaded HTML files (not needed for deployment)
 rmqc/
 pages/
+claude/
 
 # Large data file (use split files instead)
 albums.json
