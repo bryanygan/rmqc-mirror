@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="origin">
+  <title>Mirror Yupoo Album - RMQC Mirror</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #f8f8f8;
+    }
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #333;
+    }
+    input[type="url"] {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    input[type="url"]:focus {
+      outline: none;
+      border-color: #49bc85;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: #49bc85;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover:not(:disabled) {
+      background: #3da871;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .status {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 4px;
+      display: none;
+    }
+    .status.loading {
+      display: block;
+      background: #e3f2fd;
+      color: #1976d2;
+      border: 1px solid #1976d2;
+    }
+    .status.success {
+      display: block;
+      background: #e8f5e9;
+      color: #2e7d32;
+      border: 1px solid #2e7d32;
+    }
+    .status.error {
+      display: block;
+      background: #ffebee;
+      color: #c62828;
+      border: 1px solid #c62828;
+    }
+    .mirror-result {
+      margin-top: 15px;
+    }
+    .mirror-url {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .mirror-url input {
+      flex: 1;
+      padding: 10px;
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    .mirror-url button {
+      width: auto;
+      padding: 10px 20px;
+    }
+    .instructions {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f5f5f5;
+      border-radius: 4px;
+    }
+    .instructions h3 {
+      margin-top: 0;
+      color: #333;
+    }
+    .instructions ul {
+      padding-left: 20px;
+    }
+    .back-link {
+      text-align: center;
+      margin-top: 30px;
+    }
+    .back-link a {
+      color: #49bc85;
+      text-decoration: none;
+    }
+    .back-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🪞 Mirror Yupoo Album</h1>
+    <p class="subtitle">Create a permanent mirror of any Yupoo album</p>
+
+    <form id="mirror-form">
+      <div class="form-group">
+        <label for="yupoo-url">Yupoo Album URL:</label>
+        <input
+          type="url"
+          id="yupoo-url"
+          name="url"
+          placeholder="https://rmqc.x.yupoo.com/albums/123456?uid=1"
+          required
+        >
+      </div>
+      <button type="submit" id="submit-btn">Mirror This Album</button>
+    </form>
+
+    <div id="status" class="status"></div>
+
+    <div class="instructions">
+      <h3>How it works:</h3>
+      <ul>
+        <li>Paste any Yupoo album URL above</li>
+        <li>Click "Mirror This Album"</li>
+        <li>Wait 5-10 seconds for processing</li>
+        <li>Receive a permanent mirror URL you can share</li>
+      </ul>
+      <p><strong>Example URL:</strong> https://rmqc.x.yupoo.com/albums/220231397?uid=1</p>
+    </div>
+
+    <div class="back-link">
+      <a href="/">← Back to Album Collection</a>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('mirror-form');
+    const urlInput = document.getElementById('yupoo-url');
+    const submitBtn = document.getElementById('submit-btn');
+    const statusDiv = document.getElementById('status');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const url = urlInput.value.trim();
+
+      // Basic validation
+      if (!url.includes('yupoo.com/albums/')) {
+        showStatus('error', 'Please enter a valid Yupoo album URL');
+        return;
+      }
+
+      // Show loading state
+      showStatus('loading', '⏳ Processing your album... This may take 5-10 seconds.');
+      submitBtn.disabled = true;
+
+      try {
+        const response = await fetch('/api/mirror', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ url }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showMirrorSuccess(data);
+        } else {
+          showStatus('error', `Error: ${data.message || 'Failed to create mirror'}`);
+        }
+      } catch (error) {
+        showStatus('error', `Network error: ${error.message}`);
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+
+    function showStatus(type, message) {
+      statusDiv.className = `status ${type}`;
+      statusDiv.innerHTML = message;
+    }
+
+    function showMirrorSuccess(data) {
+      const mirrorUrl = data.mirror_url;
+      const cached = data.cached ? '(Already existed - instant result!)' : '';
+
+      statusDiv.className = 'status success';
+      statusDiv.innerHTML = `
+        <div class="mirror-result">
+          <strong>✓ Success! ${cached}</strong>
+          <p>Your mirror is ready:</p>
+          <div class="mirror-url">
+            <input type="text" value="${mirrorUrl}" id="mirror-url-input" readonly>
+            <button onclick="copyMirrorUrl()">Copy</button>
+            <button onclick="window.open('${mirrorUrl}', '_blank')">View</button>
+          </div>
+          <p style="margin-top: 10px; font-size: 14px; color: #666;">
+            Album: ${data.album.title || 'Untitled'} (${data.album.image_count || 0} images)
+          </p>
+        </div>
+      `;
+    }
+
+    function copyMirrorUrl() {
+      const input = document.getElementById('mirror-url-input');
+      input.select();
+      document.execCommand('copy');
+
+      // Modern API fallback
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(input.value);
+      }
+
+      alert('Mirror URL copied to clipboard!');
+    }
+  </script>
+</body>
+</html>

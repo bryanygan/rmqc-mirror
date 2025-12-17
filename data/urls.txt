@@ -1,0 +1,10 @@
+# Example URLs file for batch album addition
+# Add one Yupoo album URL per line
+# Lines starting with # are ignored
+
+# Example format:
+# https://rmqc.x.yupoo.com/albums/220231397?uid=1
+# https://rmqc.x.yupoo.com/albums/220231398?uid=1
+
+# To use this file:
+# python3 scripts/add_album.py --batch data/urls.txt

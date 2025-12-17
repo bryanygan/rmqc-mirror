@@ -1,0 +1,27 @@
+{
+  "yupoo": {
+    "base_url": "https://rmqc.x.yupoo.com",
+    "rate_limit_seconds": 1,
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "timeout_seconds": 30
+  },
+  "updates": {
+    "check_frequency": "daily",
+    "check_time_utc": "02:00",
+    "auto_deploy": true,
+    "notification_webhook": null
+  },
+  "paths": {
+    "downloads": "rmqc",
+    "pages": "pages",
+    "data": "albums-data",
+    "logs": "logs",
+    "temp": "data"
+  },
+  "deployment": {
+    "method": "wrangler",
+    "cloudflare_project": "preorders",
+    "auto_commit": true,
+    "live_url": "https://zrqc.zrhauls.com/"
+  }
+}

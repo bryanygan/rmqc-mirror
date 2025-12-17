@@ -1,2 +1,6 @@
 name = "preorders"
 pages_build_output_dir = "."
+
+[[kv_namespaces]]
+binding = "MIRRORS"
+id = "086dff3255514067a01ce25c2895807a"

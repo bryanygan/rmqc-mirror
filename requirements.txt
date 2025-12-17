@@ -1,0 +1,11 @@
+# Python dependencies for RMQC mirror site
+
+# Web scraping
+requests>=2.31.0
+
+# HTML parsing
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# Optional: For future enhancements
+# pyperclip>=1.8.0  # Clipboard support for add_album.py --clipboard

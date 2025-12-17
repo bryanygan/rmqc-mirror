@@ -1,7 +1,6 @@
 # Downloaded HTML files (not needed for deployment)
 rmqc/
 pages/
-claude/
 .claude/
 
 # Large data file (use split files instead)
@@ -12,10 +11,24 @@ albums.json
 __pycache__/
 *.pyc
 
+# Scripts directory
+scripts/
+
+# Data and logs
+data/
+logs/
+
 # Temporary/debug files
 debug-gallery.html
 referrer-test.html
 test.html
 
+# Git files
+.git/
+.gitignore
+
 # System files
 .DS_Store
+
+# Node modules
+node_modules/
