@@ -248,6 +248,10 @@
 
     function copyMirrorUrl() {
       const input = document.getElementById('mirror-url-input');
+      const copyBtn = event.currentTarget;
+      const originalText = copyBtn.textContent;
+      const originalBg = copyBtn.style.background;
+
       input.select();
       document.execCommand('copy');
 
@@ -256,7 +260,15 @@
         navigator.clipboard.writeText(input.value);
       }
 
-      alert('Mirror URL copied to clipboard!');
+      // Change to green checkmark
+      copyBtn.textContent = '✓';
+      copyBtn.style.background = '#4caf50';
+
+      // Revert after 2 seconds
+      setTimeout(() => {
+        copyBtn.textContent = originalText;
+        copyBtn.style.background = originalBg;
+      }, 2000);
     }
   </script>
 </body>
