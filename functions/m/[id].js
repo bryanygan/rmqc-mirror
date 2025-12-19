@@ -47,7 +47,7 @@ function generateMirrorHTML(mirror) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="referrer" content="origin">
-  <title>${escapeHtml(mirror.title)} - RMQC Mirror</title>
+  <title>${escapeHtml(mirror.title)}</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -130,7 +130,7 @@ function generateErrorHTML(message) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Error - RMQC Mirror</title>
+  <title>Error</title>
   <style>
     body {
       font-family: Arial, sans-serif;
