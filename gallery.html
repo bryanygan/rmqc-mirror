@@ -40,6 +40,93 @@
       text-align: center;
       color: #c00;
     }
+
+    /* Lightbox styles */
+    .lightbox {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      z-index: 1000;
+      cursor: pointer;
+    }
+    .lightbox.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .lightbox-content {
+      position: relative;
+      max-width: 90%;
+      max-height: 90%;
+      cursor: default;
+    }
+    .lightbox-image {
+      max-width: 100%;
+      max-height: 90vh;
+      object-fit: contain;
+      display: block;
+    }
+    .lightbox-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: none;
+      font-size: 48px;
+      padding: 20px;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s;
+      border-radius: 4px;
+      line-height: 1;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .lightbox-nav:hover {
+      background-color: rgba(255, 255, 255, 0.4);
+    }
+    .lightbox-nav.prev {
+      left: 20px;
+    }
+    .lightbox-nav.next {
+      right: 20px;
+    }
+    .lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      color: white;
+      font-size: 40px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      width: 40px;
+      height: 40px;
+      line-height: 1;
+    }
+    .lightbox-close:hover {
+      color: #ccc;
+    }
+    .lightbox-counter {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-size: 18px;
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 8px 16px;
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
@@ -47,7 +134,82 @@
   <h1 id="gallery-title">Gallery</h1>
   <div id="gallery" class="gallery"></div>
   <p id="message" class="not-found" style="display:none;">Album not found.</p>
+
+  <!-- Lightbox Modal -->
+  <div id="lightbox" class="lightbox">
+    <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+    <div class="lightbox-counter" id="lightbox-counter"></div>
+    <button class="lightbox-nav prev" onclick="navigateLightbox(-1); event.stopPropagation();">&#10094;</button>
+    <div class="lightbox-content" onclick="event.stopPropagation()">
+      <img id="lightbox-image" class="lightbox-image" src="" alt="">
+    </div>
+    <button class="lightbox-nav next" onclick="navigateLightbox(1); event.stopPropagation();">&#10095;</button>
+  </div>
   <script>
+    // Global variables for lightbox
+    let currentImages = [];
+    let currentIndex = 0;
+
+    function openLightbox(index) {
+      currentIndex = index;
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImage = document.getElementById('lightbox-image');
+      const counter = document.getElementById('lightbox-counter');
+
+      // Use the large image if available, otherwise fall back to small
+      const imgData = currentImages[currentIndex];
+      lightboxImage.src = imgData.large || imgData.small;
+      lightboxImage.alt = imgData.alt;
+
+      counter.textContent = `${currentIndex + 1} / ${currentImages.length}`;
+      lightbox.classList.add('active');
+
+      // Prevent body scrolling when lightbox is open
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+      const lightbox = document.getElementById('lightbox');
+      lightbox.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function navigateLightbox(direction) {
+      currentIndex += direction;
+
+      // Wrap around
+      if (currentIndex < 0) {
+        currentIndex = currentImages.length - 1;
+      } else if (currentIndex >= currentImages.length) {
+        currentIndex = 0;
+      }
+
+      const lightboxImage = document.getElementById('lightbox-image');
+      const counter = document.getElementById('lightbox-counter');
+      const imgData = currentImages[currentIndex];
+
+      lightboxImage.src = imgData.large || imgData.small;
+      lightboxImage.alt = imgData.alt;
+      counter.textContent = `${currentIndex + 1} / ${currentImages.length}`;
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      const lightbox = document.getElementById('lightbox');
+      if (!lightbox.classList.contains('active')) return;
+
+      if (e.key === 'Escape') {
+        closeLightbox();
+      } else if (e.key === 'ArrowLeft') {
+        navigateLightbox(-1);
+      } else if (e.key === 'ArrowRight') {
+        navigateLightbox(1);
+      }
+    });
+
+    // Close lightbox when clicking on background
+    document.getElementById('lightbox').addEventListener('click', closeLightbox);
+
     (function() {
       // Parse album ID from query string
       const params = new URLSearchParams(window.location.search);
@@ -113,14 +275,20 @@
           }
 
           // Display images
-          // Note: We can't use target="_blank" links because Yupoo blocks hotlinking
-          // when opening in a new tab (referrer policy doesn't transfer properly)
-          album.images.forEach(img => {
+          // Store images globally for lightbox navigation
+          currentImages = album.images.map(img => ({
+            small: img.small,
+            large: img.large,
+            alt: album.title
+          }));
+
+          album.images.forEach((img, index) => {
             const image = document.createElement('img');
             image.src = img.small;
             image.alt = album.title;
             image.referrerPolicy = 'origin';
-            image.style.cursor = 'default';
+            image.style.cursor = 'pointer';
+            image.onclick = () => openLightbox(index);
             galleryEl.appendChild(image);
           });
         })
