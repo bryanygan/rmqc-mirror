@@ -57,10 +57,10 @@ def main():
     pages_dir = base_dir / 'pages'
     pages_dir.mkdir(exist_ok=True)
 
-    print("Downloading all 72 pages from Yupoo...")
+    print("Downloading all 125 pages from Yupoo...")
     print(f"Output directory: {pages_dir}\n")
 
-    total_pages = 72
+    total_pages = 125
     successful = 0
     failed = 0
 

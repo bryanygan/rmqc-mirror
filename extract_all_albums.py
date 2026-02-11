@@ -99,9 +99,9 @@ def extract_albums_from_listing(html_path):
 
     albums = []
 
-    # Try two patterns - one for downloaded pages (relative URLs) and one for saved pages (absolute URLs)
+    # Try multiple patterns for different HTML formats
 
-    # Pattern 1: For pages downloaded via requests (relative URLs, data-src)
+    # Pattern 1: For pages downloaded via requests (relative URLs, data-src on same line)
     pattern1 = r'<a\s+class="album__main"\s+title="([^"]*)"\s+href="/albums/(\d+)\?uid=1".*?data-src="([^"]*)"'
     matches1 = re.findall(pattern1, content, re.DOTALL)
 
@@ -109,8 +109,12 @@ def extract_albums_from_listing(html_path):
     pattern2 = r'<a class="album__main" title="([^"]*)" href="https://rmqc\.x\.yupoo\.com/albums/(\d+)\?uid=1">.*?<img alt="" data-type="photo" class="album__absolute album__img autocover" src="([^"]*)">'
     matches2 = re.findall(pattern2, content, re.DOTALL)
 
+    # Pattern 3: New Yupoo format (multi-line attributes, src instead of data-src)
+    pattern3 = r'<a\s+class="album__main"\s+title="([^"]*)"\s+href="/albums/(\d+)\?uid=1"\s*>.*?<img[^>]+src="([^"]*)"'
+    matches3 = re.findall(pattern3, content, re.DOTALL)
+
     # Use whichever pattern found matches
-    matches = matches1 if matches1 else matches2
+    matches = matches1 if matches1 else (matches2 if matches2 else matches3)
 
     for title, album_id, cover_src in matches:
         # Normalize the cover URL
@@ -124,11 +128,23 @@ def extract_albums_from_listing(html_path):
         else:
             cover_path = None
 
+        # Normalize cover to use medium.jpg for consistency
+        if cover_path and 'photo.yupoo.com/rmqc/' in cover_path:
+            match = re.search(r'photo\.yupoo\.com/rmqc/([a-f0-9]+)/', cover_path)
+            if match:
+                img_id = match.group(1)
+                cover_path = f'https://photo.yupoo.com/rmqc/{img_id}/medium.jpg'
+
+        # Create a single-image entry from the cover so the album isn't filtered out
+        images = []
+        if cover_path:
+            images = [{'small': cover_path, 'big': cover_path}]
+
         albums.append({
             'id': album_id,
             'title': title,
             'cover': cover_path,
-            'images': []
+            'images': images
         })
 
     return albums
