@@ -12,10 +12,21 @@ albums.json
 __pycache__/
 *.pyc
 
+# Scripts and data directories
+scripts/
+data/
+logs/
+
 # Temporary/debug files
 debug-gallery.html
 referrer-test.html
 test.html
+
+# Wrangler (Pages does not support .wranglerignore)
+.wrangler/
+
+# Node modules
+node_modules/
 
 # System files
 .DS_Store

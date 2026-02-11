@@ -12,7 +12,7 @@ mkdir -p /tmp/mirror-deploy
 
 # Copy necessary files
 echo "📦 Copying files..."
-cp index.html gallery.html mirror.html m.html wrangler.toml albums-index.json /tmp/mirror-deploy/
+cp index.html gallery.html mirror.html m.html wrangler.toml albums-index.json config.json /tmp/mirror-deploy/
 cp -r functions /tmp/mirror-deploy/
 cp -r albums-data /tmp/mirror-deploy/
 
