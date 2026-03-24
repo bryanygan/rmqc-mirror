@@ -122,13 +122,14 @@ function generateMirrorHTML(mirror) {
     }
     .lightbox-content {
       position: relative;
-      max-width: 90%;
-      max-height: 90%;
+      max-width: calc(100% - 120px);
+      max-height: calc(100% - 100px);
+      margin-top: 50px;
       cursor: default;
     }
     .lightbox-image {
       max-width: 100%;
-      max-height: 90vh;
+      max-height: calc(100vh - 100px);
       object-fit: contain;
       display: block;
     }
@@ -139,34 +140,35 @@ function generateMirrorHTML(mirror) {
       background-color: rgba(255, 255, 255, 0.2);
       color: white;
       border: none;
-      font-size: 48px;
-      padding: 20px;
+      font-size: 36px;
       cursor: pointer;
       user-select: none;
       transition: background-color 0.3s;
       border-radius: 4px;
       line-height: 1;
-      width: 60px;
-      height: 60px;
+      width: 50px;
+      height: 50px;
       display: flex;
       align-items: center;
       justify-content: center;
+      z-index: 1002;
+      padding: 0;
     }
     .lightbox-nav:hover {
       background-color: rgba(255, 255, 255, 0.4);
     }
     .lightbox-nav.prev {
-      left: 20px;
+      left: 10px;
     }
     .lightbox-nav.next {
-      right: 20px;
+      right: 10px;
     }
     .lightbox-close {
       position: absolute;
-      top: 20px;
-      right: 30px;
+      top: 15px;
+      right: 20px;
       color: white;
-      font-size: 40px;
+      font-size: 36px;
       cursor: pointer;
       background: none;
       border: none;
@@ -174,20 +176,38 @@ function generateMirrorHTML(mirror) {
       width: 40px;
       height: 40px;
       line-height: 1;
+      z-index: 1002;
     }
     .lightbox-close:hover {
       color: #ccc;
     }
     .lightbox-counter {
       position: absolute;
-      top: 20px;
+      top: 15px;
       left: 50%;
       transform: translateX(-50%);
       color: white;
-      font-size: 18px;
+      font-size: 16px;
       background-color: rgba(0, 0, 0, 0.5);
-      padding: 8px 16px;
+      padding: 6px 14px;
       border-radius: 4px;
+      z-index: 1002;
+    }
+    @media (max-width: 600px) {
+      .lightbox-content {
+        max-width: calc(100% - 80px);
+      }
+      .lightbox-nav {
+        width: 36px;
+        height: 36px;
+        font-size: 24px;
+      }
+      .lightbox-nav.prev {
+        left: 5px;
+      }
+      .lightbox-nav.next {
+        right: 5px;
+      }
     }
   </style>
 </head>
