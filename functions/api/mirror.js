@@ -17,17 +17,18 @@ export async function onRequestPost(context) {
     const yupooUrl = body.url;
 
     // Validate URL
-    const albumId = extractAlbumId(yupooUrl);
-    if (!albumId) {
+    const parsed = parseAlbumUrl(yupooUrl);
+    if (!parsed) {
       return jsonResponse({
         success: false,
         error: 'invalid_url',
-        message: 'Invalid Yupoo album URL. Expected format: https://rmqc.x.yupoo.com/albums/[ID]',
+        message: 'Invalid Yupoo album URL. Expected format: https://{vendor}.x.yupoo.com/albums/[ID]',
       }, 400);
     }
+    const { vendor, albumId } = parsed;
 
     // Check if already mirrored (cache hit)
-    const existingMirrorId = await env.MIRRORS.get(`yupoo:${albumId}`);
+    const existingMirrorId = await env.MIRRORS.get(`yupoo:${vendor}:${albumId}`);
     if (existingMirrorId) {
       // Return cached mirror
       const existingMirror = await env.MIRRORS.get(`mirror:${existingMirrorId}`);
@@ -48,7 +49,7 @@ export async function onRequestPost(context) {
     }
 
     // Fetch album from Yupoo
-    const albumData = await fetchYupooAlbum(albumId);
+    const albumData = await fetchYupooAlbum(vendor, albumId);
     if (!albumData) {
       return jsonResponse({
         success: false,
@@ -63,6 +64,7 @@ export async function onRequestPost(context) {
     // Store mirror data
     const mirrorData = {
       id: mirrorId,
+      vendor,
       yupoo_id: albumId,
       title: albumData.title,
       cover: albumData.cover,
@@ -74,7 +76,7 @@ export async function onRequestPost(context) {
 
     // Save to KV
     await env.MIRRORS.put(`mirror:${mirrorId}`, JSON.stringify(mirrorData));
-    await env.MIRRORS.put(`yupoo:${albumId}`, mirrorId);
+    await env.MIRRORS.put(`yupoo:${vendor}:${albumId}`, mirrorId);
 
     // Return success
     return jsonResponse({
@@ -99,15 +101,16 @@ export async function onRequestPost(context) {
   }
 }
 
-// Helper: Extract album ID from Yupoo URL
-function extractAlbumId(url) {
-  const match = url.match(/yupoo\.com\/albums\/(\d+)/);
-  return match ? match[1] : null;
+// Helper: Extract vendor + album ID from a Yupoo album URL
+function parseAlbumUrl(url) {
+  const match = url.match(/https?:\/\/([a-zA-Z0-9_-]+)\.x\.yupoo\.com\/albums\/(\d+)/);
+  if (!match) return null;
+  return { vendor: match[1], albumId: match[2] };
 }
 
 // Helper: Fetch and parse Yupoo album
-async function fetchYupooAlbum(albumId) {
-  const url = `https://rmqc.x.yupoo.com/albums/${albumId}?uid=1`;
+async function fetchYupooAlbum(vendor, albumId) {
+  const url = `https://${vendor}.x.yupoo.com/albums/${albumId}?uid=1`;
 
   try {
     const response = await fetch(url, {
@@ -129,25 +132,25 @@ async function fetchYupooAlbum(albumId) {
     // Extract images using regex
     const images = [];
     // Try data-src pattern (current Yupoo format)
-    const imagePattern = /data-src="[^"]*photo\.yupoo\.com\/rmqc\/([^/"]+)/g;
+    const imagePattern = new RegExp(`data-src="[^"]*photo\\.yupoo\\.com/${vendor}/([^/"]+)`, 'g');
     let match;
 
     while ((match = imagePattern.exec(html)) !== null) {
       const imgId = match[1];
       images.push({
-        small: `/api/image/rmqc/${imgId}/small.jpg`,
-        big: `/api/image/rmqc/${imgId}/big.jpg`,
+        small: `/api/image/${vendor}/${imgId}/small.jpg`,
+        big: `/api/image/${vendor}/${imgId}/big.jpg`,
       });
     }
 
     // Fallback: try data-origin pattern (older format)
     if (images.length === 0) {
-      const fallbackPattern = /data-origin="[^"]*photo\.yupoo\.com\/rmqc\/([^/"]+)/g;
+      const fallbackPattern = new RegExp(`data-origin="[^"]*photo\\.yupoo\\.com/${vendor}/([^/"]+)`, 'g');
       while ((match = fallbackPattern.exec(html)) !== null) {
         const imgId = match[1];
         images.push({
-          small: `/api/image/rmqc/${imgId}/small.jpg`,
-          big: `/api/image/rmqc/${imgId}/big.jpg`,
+          small: `/api/image/${vendor}/${imgId}/small.jpg`,
+          big: `/api/image/${vendor}/${imgId}/big.jpg`,
         });
       }
     }

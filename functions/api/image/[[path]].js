@@ -26,7 +26,7 @@ export async function onRequest(context) {
     // Fetch the image with proper headers
     const imageResponse = await fetch(imageUrl, {
       headers: {
-        'Referer': 'https://rmqc.x.yupoo.com/',
+        'Referer': `https://${vendor}.x.yupoo.com/`,
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       },
     });
